@@ -1,5 +1,5 @@
 # .github/workflows/deploy.yml
-name: Deploy to AWS ECR
+name: Deploy to AWS Lambda
 
 on:
   push:
@@ -25,6 +25,19 @@ jobs:
         id: login-ecr
         run: |
           aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 992382391800.dkr.ecr.ap-northeast-2.amazonaws.com
+
+      - name: Delete old images from ECR
+        env:
+          AWS_REGION: ap-northeast-2
+          ECR_REPOSITORY: mvti_be_recommend
+        run: |
+          # Get the list of image IDs
+          IMAGE_IDS=$(aws ecr list-images --repository-name $ECR_REPOSITORY --region $AWS_REGION --query 'imageIds[*]' --output json)
+
+          # Delete the images
+          if [ "$IMAGE_IDS" != "[]" ]; then
+            aws ecr batch-delete-image --repository-name $ECR_REPOSITORY --region $AWS_REGION --image-ids "$IMAGE_IDS"
+          fi
 
       - name: Build, tag, and push image to ECR
         env:
@@ -58,3 +71,12 @@ jobs:
 
           # Push the Docker image to ECR
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Update Lambda function
+        env:
+          AWS_REGION: ap-northeast-2
+          FUNCTION_NAME: arn:aws:lambda:ap-northeast-2:992382391800:function:mvti-recommend-server
+          ECR_IMAGE_URI: 992382391800.dkr.ecr.ap-northeast-2.amazonaws.com/mvti_be_recommend:latest
+        run: |
+          # Update the Lambda function with the new image
+          aws lambda update-function-code --function-name $FUNCTION_NAME --image-uri $ECR_IMAGE_URI --region $AWS_REGION
