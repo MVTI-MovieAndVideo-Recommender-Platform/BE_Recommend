@@ -2,6 +2,7 @@ app/__pycache__
 app/database/__pycache__
 app/model/__pycache__
 app/resources/__pycache__
+app/resources/data
 app/routes/__pycache__
 app/routes/api/__pycache__
 app/routes/apihelper/__pycache__

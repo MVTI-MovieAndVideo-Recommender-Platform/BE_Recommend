@@ -47,9 +47,7 @@ async def save_recommendation_to_db(recommend_orm, get_db):
 
 
 async def process_recommendations(
-    request,
-    recommender_input,
-    mysql_db: AsyncSession,
+    recommender_input: dict,
     background_tasks: BackgroundTasks,
     re_recommend=False,
 ):
@@ -61,10 +59,9 @@ async def process_recommendations(
     recommend_cursor = get_recommendations_with_details(result)
 
     input_media_id_list, recommend_list = await asyncio.gather(input_media_cursor, recommend_cursor)
-
-    if request.state.token and (user_id := base64_to_uuid(request.state.token)):
+    if recommender_input.get("user_id"):
         recommend_orm = RecommendORM(
-            user_id=user_id,
+            user_id=recommender_input["user_id"],
             user_mbti=recommender_input["user_mbti"].upper(),
             input_media_id=", ".join([str(id.get("id")) for id in input_media_id_list]),
             recommended_media_id=", ".join([str(i.get("id")) for i in recommend_list]),

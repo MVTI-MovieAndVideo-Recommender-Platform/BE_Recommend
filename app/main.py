@@ -41,7 +41,6 @@ async def verify_access_token(_jwt: str) -> Union[dict, None]:
 
 class DataValidationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # jwt_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6Ii1aNG1XUG1WV3RTU0VzUFJyR29iRGciLCJwcm92aWRlciI6Imtha2FvIn0.gLgm0bnd4Qfz4fW3isvbGzWpnnk2bba9Lw_ho0BmlTU"
         # 기타 검증 로직을 여기에 추가할 수 있습니다.
         # 검증이 통과하면 다음 미들웨어 또는 요청 핸들러로 넘어갑니다.
         try:
